@@ -4,6 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <algorithm>
+#include <fstream>
 
 // Clase para representar un médico.
 struct Medico {
@@ -12,6 +15,20 @@ struct Medico {
     std::string especialidad;
 
     Medico(int id, const std::string &nombre) : id(id), nombre(nombre), especialidad("Sin asignar") {}
+
+    // Constructor desde una línea CSV
+    Medico(const std::string& csvLine) {
+        std::stringstream ss(csvLine);
+        ss >> id;
+        ss.ignore(); // Ignorar la coma
+        std::getline(ss, nombre, ',');
+        std::getline(ss, especialidad);
+    }
+
+    // Convertir a CSV
+    std::string toCSV() const {
+        return std::to_string(id) + "," + nombre + "," + especialidad;
+    }
 };
 
 // Clase para representar un paciente.
@@ -22,6 +39,19 @@ struct Paciente {
 
     Paciente(int id, const std::string &nombre, const std::string &enfermedad)
         : id(id), nombre(nombre), enfermedad(enfermedad) {}
+
+         Paciente(const std::string& csvLine) {
+        std::stringstream ss(csvLine);
+        ss >> id;
+        ss.ignore(); // Ignorar la coma
+        std::getline(ss, nombre, ',');
+        std::getline(ss, enfermedad);
+    }
+
+    // Convertir a CSV
+    std::string toCSV() const {
+        return std::to_string(id) + "," + nombre + "," + enfermedad;
+    }
 };
 // Clase para representar una cita médica
 struct Cita {

@@ -11,56 +11,39 @@ void ControladorHospital::leerDatos() {
     std::ifstream medicosFile("medicos.csv");
     if (medicosFile.is_open()) {
         std::string line;
+        std::getline(medicosFile, line); // Ignorar encabezado
         while (std::getline(medicosFile, line)) {
-            std::stringstream ss(line);
-            int id;
-            std::string nombre, especialidad;
-
-            // Leer columnas separadas por comas
-            std::getline(ss, nombre, ',');
-            ss >> id;
-            ss.ignore(); // Ignorar la coma que separa "id" y "especialidad"
-            std::getline(ss, especialidad);
-
-            if (!nombre.empty()) { // Evitar entradas vacías
-                medicos.emplace_back(id, nombre);
-                medicos.back().especialidad = especialidad; // Asignar especialidad
+            if (!line.empty()) {
+                medicos.emplace_back(line);
             }
         }
         medicosFile.close();
         std::cout << "Datos de médicos cargados exitosamente desde medicos.csv.\n";
     } else {
-        std::cout << "No se pudo abrir el archivo de médicos.\n";
+        std::cerr << "No se pudo abrir el archivo de médicos.\n";
     }
 
     // Leer pacientes desde el archivo CSV
     std::ifstream pacientesFile("pacientes.csv");
     if (pacientesFile.is_open()) {
         std::string line;
+        std::getline(pacientesFile, line); // Ignorar encabezado
         while (std::getline(pacientesFile, line)) {
-            std::stringstream ss(line);
-            int id;
-            std::string nombre, enfermedad;
-
-            // Leer columnas separadas por comas
-            std::getline(ss, nombre, ',');
-            ss >> id;
-            ss.ignore(); // Ignorar la coma que separa "id" y "enfermedad"
-            std::getline(ss, enfermedad);
-
-            if (!nombre.empty()) { // Evitar entradas vacías
-                pacientes.emplace_back(id, nombre, enfermedad);
+            if (!line.empty()) {
+                pacientes.emplace_back(line);
             }
         }
         pacientesFile.close();
         std::cout << "Datos de pacientes cargados exitosamente desde pacientes.csv.\n";
     } else {
-        std::cout << "No se pudo abrir el archivo de pacientes.\n";
+        std::cerr << "No se pudo abrir el archivo de pacientes.\n";
     }
+
     // Leer citas
     std::ifstream citasFile("citas.csv");
     if (citasFile.is_open()) {
         std::string line;
+        std::getline(citasFile, line); // Ignorar encabezado
         while (std::getline(citasFile, line)) {
             std::stringstream ss(line);
             int idPaciente, idMedico;
@@ -73,20 +56,32 @@ void ControladorHospital::leerDatos() {
             citas.emplace_back(idPaciente, idMedico, fecha);
         }
         citasFile.close();
-        std::cout << "Datos de citas cargados exitosamente.\n";
+        std::cout << "Datos de citas cargados exitosamente desde citas.csv.\n";
+    } else {
+        std::cerr << "No se pudo abrir el archivo de citas.\n";
     }
 }
+
 
 
 
 // --- Guardar datos ---
 
 void ControladorHospital::guardarDatos() {
-    // Guardar médicos en un archivo CSV
+    // Ordenar y guardar médicos
+    std::sort(medicos.begin(), medicos.end(), [](const Medico& a, const Medico& b) {
+        if (a.id != b.id)
+            return a.id < b.id; // Ordenar por ID
+        if (a.nombre != b.nombre)
+            return a.nombre < b.nombre; // Ordenar por nombre
+        return a.especialidad < b.especialidad; // Ordenar por especialidad
+    });
+
     std::ofstream medicosFile("medicos.csv");
     if (medicosFile.is_open()) {
-        for (const auto &medico : medicos) {
-            medicosFile << medico.nombre << "," << medico.id << "," << medico.especialidad << "\n";
+        medicosFile << "ID,Nombre,Especialidad\n"; // Encabezado
+        for (const auto& medico : medicos) {
+            medicosFile << medico.toCSV() << "\n";
         }
         medicosFile.close();
         std::cout << "Datos de médicos guardados exitosamente en medicos.csv.\n";
@@ -94,27 +89,42 @@ void ControladorHospital::guardarDatos() {
         std::cerr << "Error al abrir el archivo de médicos para guardar.\n";
     }
 
-    // Guardar pacientes en un archivo CSV
+    // Ordenar y guardar pacientes
+    std::sort(pacientes.begin(), pacientes.end(), [](const Paciente& a, const Paciente& b) {
+        if (a.id != b.id)
+            return a.id < b.id; // Ordenar por ID
+        if (a.nombre != b.nombre)
+            return a.nombre < b.nombre; // Ordenar por nombre
+        return a.enfermedad < b.enfermedad; // Ordenar por enfermedad
+    });
+
     std::ofstream pacientesFile("pacientes.csv");
     if (pacientesFile.is_open()) {
-        for (const auto &paciente : pacientes) {
-            pacientesFile << paciente.nombre << "," << paciente.id << "," << paciente.enfermedad << "\n";
+        pacientesFile << "ID,Nombre,Enfermedad\n"; // Encabezado
+        for (const auto& paciente : pacientes) {
+            pacientesFile << paciente.toCSV() << "\n";
         }
         pacientesFile.close();
         std::cout << "Datos de pacientes guardados exitosamente en pacientes.csv.\n";
     } else {
         std::cerr << "Error al abrir el archivo de pacientes para guardar.\n";
     }
-       // Guardar citas
+
+    // Guardar citas
     std::ofstream citasFile("citas.csv");
     if (citasFile.is_open()) {
-        for (const auto &cita : citas) {
+        citasFile << "ID_Paciente,ID_Medico,Fecha\n"; // Encabezado
+        for (const auto& cita : citas) {
             citasFile << cita.idPaciente << "," << cita.idMedico << "," << cita.fecha << "\n";
         }
         citasFile.close();
-        std::cout << "Datos de citas guardados exitosamente.\n";
+        std::cout << "Datos de citas guardados exitosamente en citas.csv.\n";
+    } else {
+        std::cerr << "Error al abrir el archivo de citas para guardar.\n";
     }
 }
+
+
 
 
 
@@ -241,7 +251,7 @@ void ControladorHospital::buscarPaciente() {
         for (const auto &paciente : pacientes) {
             std::cout << "ID: " << paciente.id
                       << ", Nombre: " << paciente.nombre
-                      << ", Especialidad: " << paciente.enfermedad << "\n";
+                      << ", Enfermedad: " << paciente.enfermedad << "\n";
         }
     }
 }
