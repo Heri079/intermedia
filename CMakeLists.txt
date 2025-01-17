@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 # Nombre del proyecto
 project(HospitalSimulator)
 
-# Establecer el estándar de C++, no uso los de otro estandar porque es demasiado para este proyecto
+# Establecer el estándar de C++, no uso los de otro estándar porque es demasiado para este proyecto
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -17,8 +17,17 @@ file(GLOB HEADERS ${SOURCE_DIR}/*.hpp)
 # Incluir el directorio de encabezados para el compilador
 include_directories(${SOURCE_DIR})
 
-
-# se crea el ejecutable PARA ESO HAY QUE COMPILARLO
+# Crear el ejecutable
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
+# Archivos CSV que se deben copiar al mismo directorio que el binario final
+set(CSV_FILES ${CMAKE_SOURCE_DIR}/medicos.csv ${CMAKE_SOURCE_DIR}/pacientes.csv ${CMAKE_SOURCE_DIR}/citas.csv)
 
+# Copiar los archivos CSV al directorio de salida
+foreach(CSV_FILE ${CSV_FILES})
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${CSV_FILE} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMENT "Copiando ${CSV_FILE} al directorio binario"
+    )
+endforeach()
