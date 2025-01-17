@@ -5,6 +5,7 @@
 #include "MenuReportes.hpp"
 #include "ControladorHospital.hpp"
 
+
 void mostrarMenuPrincipal() {
     std::cout << "\n=================== MENU PRINCIPAL ===================\n";
     std::cout << "1. Gestión de Pacientes\n";
@@ -17,9 +18,12 @@ void mostrarMenuPrincipal() {
 }
 
 int main() {
-    ControladorHospital controlador; // Para centralizar la lógica del sistema.
-    int opcion;
+     ControladorHospital controlador;
 
+    // Cargar datos al iniciar
+    controlador.leerDatos();
+
+    int opcion;
     do {
         mostrarMenuPrincipal();
         std::cin >> opcion;
@@ -39,7 +43,7 @@ int main() {
                 break;
             case 5:
                 std::cout << "Guardando datos y saliendo...\n";
-                controlador.guardarDatos(); // Guardar los datos en archivos.
+                controlador.guardarDatos(); // Guardar los datos en archivos
                 break;
             default:
                 std::cout << "Opción no válida. Intente de nuevo.\n";
@@ -48,4 +52,3 @@ int main() {
 
     return 0;
 }
-

@@ -23,12 +23,22 @@ struct Paciente {
     Paciente(int id, const std::string &nombre, const std::string &enfermedad)
         : id(id), nombre(nombre), enfermedad(enfermedad) {}
 };
+// Clase para representar una cita médica
+struct Cita {
+    int idPaciente;
+    int idMedico;
+    std::string fecha;
+
+    Cita(int idPaciente, int idMedico, const std::string &fecha)
+        : idPaciente(idPaciente), idMedico(idMedico), fecha(fecha) {}
+};
 
 // Clase con la que manejo las operaciones del hospital.
 class ControladorHospital {
 private:
     std::vector<Medico> medicos;
     std::vector<Paciente> pacientes;
+    std::vector<Cita> citas;
 
 public:
     // Gestión de médicos.
@@ -56,6 +66,7 @@ public:
 
     // Guardar datos.
     void guardarDatos();
+    void leerDatos();
 };
 
 #endif // CONTROLADORHOSPITAL_HPP
