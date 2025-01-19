@@ -7,6 +7,7 @@ Intermedia es un proyecto en C++ con configuración de construcción utilizando 
 - Requisitos.
 - Instalación.
 - Uso.
+- Diagrama
 - En intermedia, se encuentran los csv con algo de contenido para que se cargue nada más ejecutar el programa por primera vez y  está el Cmakelists.txt para configurarlo con cmake, en la carpeta src está el código.
 
 ## Requisitos
@@ -29,5 +30,11 @@ Sigue los pasos para instalar y ver el proyecto:
 
 ## Uso
 Una vez dentro del programa, se te abrirá un menú, en el cual podrás navegar al presionar los números del teclado, el 1 es el apartado de los pacientes, el 2 el de los médicos, el 3 el de las citas, el 4 el de las citas y el 5, muy importante ya que la tecla 5 hace que guardes en los csv los archivos que has añadido o modificado (al cambiar los estados de las citas en el apartado de citas, hay que escribir el estado tal cual te lo pregunta el programa). 
+
+
+## Diagrama
+
+![Diagrama_intermedia](https://github.com/user-attachments/assets/cbcd3256-0b68-45d5-8c39-9caf843987af)
+
 
    
