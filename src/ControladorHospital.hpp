@@ -58,9 +58,10 @@ struct Cita {
     int idPaciente;
     int idMedico;
     std::string fecha;
+    std::string estado;
 
-    Cita(int idPaciente, int idMedico, const std::string& fecha)
-        : idPaciente(idPaciente), idMedico(idMedico), fecha(fecha) {}
+     Cita(int idPaciente, int idMedico, const std::string& fecha, const std::string& estado)
+        : idPaciente(idPaciente), idMedico(idMedico), fecha(fecha), estado(estado) {}
 
     Cita(const std::string& csvLine) {
         std::stringstream ss(csvLine);
@@ -69,10 +70,12 @@ struct Cita {
         ss >> idMedico;
         ss.ignore(); // Ignorar la coma
         std::getline(ss, fecha);
+        ss.ignore(); // Ignorar la coma
+        std::getline(ss, estado);
     }
 
     std::string toCSV() const {
-        return std::to_string(idPaciente) + "," + std::to_string(idMedico) + "," + fecha;
+        return std::to_string(idPaciente) + "," + std::to_string(idMedico) + "," + fecha + "," + estado;
     }
 };
 
@@ -106,6 +109,7 @@ public:
     void cancelarCita();
     void modificarCita();
     void listarCitas();
+    void cambiarEstadoCita();
 
     // Generando los reportes.
     void generarReportePacientesAtendidos(const std::string& fechaInicio, const std::string& fechaFin);

@@ -9,7 +9,8 @@ void mostrarMenuCitas(ControladorHospital &controlador) {
         std::cout << "2. Cancelar cita\n";
         std::cout << "3. Modificar cita\n";
         std::cout << "4. Listar citas\n";
-        std::cout << "5. Volver al menú principal\n";
+        std::cout << "5. Cambiar estado de una cita\n"; // Nueva opción
+        std::cout << "6. Volver al menú principal\n";
         std::cout << "Seleccione una opción: ";
         std::cin >> opcion;
 
@@ -27,10 +28,14 @@ void mostrarMenuCitas(ControladorHospital &controlador) {
                 controlador.listarCitas();
                 break;
             case 5:
+                controlador.cambiarEstadoCita(); // Llama a la nueva función
+                break;
+            case 6:
                 std::cout << "Volviendo al menú principal...\n";
                 break;
             default:
                 std::cout << "Opción no válida. Intente de nuevo.\n";
         }
-    } while (opcion != 5);
+    } while (opcion != 6);
 }
+

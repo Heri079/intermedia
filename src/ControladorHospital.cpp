@@ -45,19 +45,20 @@ void ControladorHospital::leerDatos() {
 
     // Leer citas
     std::ifstream citasFile("citas.csv");
-    if (citasFile.is_open()) {
-        std::string line;
-        std::getline(citasFile, line); // Ignorar encabezado
-        while (std::getline(citasFile, line)) {
-            if (!line.empty()) {
-                citas.emplace_back(line);
-            }
+if (citasFile.is_open()) {
+    std::string line;
+    std::getline(citasFile, line); // Ignorar encabezado
+    while (std::getline(citasFile, line)) {
+        if (!line.empty()) {
+            citas.emplace_back(line); // Leer con el nuevo formato que incluye estado
         }
-        citasFile.close();
-        std::cout << "Datos de citas cargados exitosamente desde citas.csv.\n";
-    } else {
-        std::cerr << "No se pudo abrir el archivo de citas.\n";
     }
+    citasFile.close();
+    std::cout << "Datos de citas cargados exitosamente desde citas.csv.\n";
+} else {
+    std::cerr << "No se pudo abrir el archivo de citas.\n";
+}
+
 }
 
 
@@ -112,7 +113,7 @@ void ControladorHospital::guardarDatos() {
     
     std::ofstream citasFile("citas.csv");
     if (citasFile.is_open()) {
-        citasFile << "ID_Paciente,ID_Medico,Fecha\n"; // Encabezado
+        citasFile << "ID_Paciente,ID_Medico,Fecha,Estado\n"; // Encabezado
         for (const auto& cita : citas) {
             citasFile << cita.toCSV() << "\n";
         }
@@ -276,12 +277,13 @@ void ControladorHospital::asignarCita() {
                                          [idMedico](const Medico &m) { return m.id == idMedico; });
 
     if (pacienteEncontrado != pacientes.end() && medicoEncontrado != medicos.end()) {
-        citas.emplace_back(idPaciente, idMedico, fecha);
+        citas.emplace_back(idPaciente, idMedico, fecha, "Pendiente");
         std::cout << "Cita asignada exitosamente.\n";
     } else {
         std::cout << "Paciente o médico no encontrado. Cita no asignada.\n";
     }
 }
+
 void ControladorHospital::cancelarCita() {
     int idPaciente, idMedico;
     std::cout << "Ingrese ID del paciente: ";
@@ -367,10 +369,42 @@ void ControladorHospital::listarCitas() {
         for (const auto &cita : citas) {
             std::cout << "ID Paciente: " << cita.idPaciente
                       << ", ID Médico: " << cita.idMedico
-                      << ", Fecha: " << cita.fecha << "\n";
+                      << ", Fecha: " << cita.fecha << "\n"
+                      << ", Estado: " << cita.estado << "\n";
         }
     }
 }
+void ControladorHospital::cambiarEstadoCita() {
+    int idPaciente, idMedico;
+    std::string nuevoEstado;
+
+    std::cout << "Ingrese el ID del paciente: ";
+    std::cin >> idPaciente;
+    std::cout << "Ingrese el ID del médico: ";
+    std::cin >> idMedico;
+
+    auto it = std::find_if(citas.begin(), citas.end(),
+                           [idPaciente, idMedico](const Cita &cita) {
+                               return cita.idPaciente == idPaciente && cita.idMedico == idMedico;
+                           });
+
+    if (it != citas.end()) {
+        std::cout << "Estado actual: " << it->estado << "\n";
+        std::cout << "Ingrese el nuevo estado (Pendiente, Cancelada, Realizada): ";
+        std::cin.ignore();
+        std::getline(std::cin, nuevoEstado);
+
+        if (nuevoEstado == "Pendiente" || nuevoEstado == "Cancelada" || nuevoEstado == "Realizada") {
+            it->estado = nuevoEstado;
+            std::cout << "Estado de la cita actualizado exitosamente.\n";
+        } else {
+            std::cout << "Estado no válido. No se realizaron cambios.\n";
+        }
+    } else {
+        std::cout << "Cita no encontrada.\n";
+    }
+}
+
 
 
 void ControladorHospital::generarReportePacientesAtendidos(const std::string& fechaInicio, const std::string& fechaFin) {
@@ -452,8 +486,3 @@ void ControladorHospital::generarReporteCitasPendientesPorEspecialidad() {
         }
     }
 }
-
-
-
-
-
