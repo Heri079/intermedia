@@ -59,9 +59,25 @@ struct Cita {
     int idMedico;
     std::string fecha;
 
-    Cita(int idPaciente, int idMedico, const std::string &fecha)
+    Cita(int idPaciente, int idMedico, const std::string& fecha)
         : idPaciente(idPaciente), idMedico(idMedico), fecha(fecha) {}
+
+    Cita(const std::string& csvLine) {
+        std::stringstream ss(csvLine);
+        ss >> idPaciente;
+        ss.ignore(); // Ignorar la coma
+        ss >> idMedico;
+        ss.ignore(); // Ignorar la coma
+        std::getline(ss, fecha);
+    }
+
+    std::string toCSV() const {
+        return std::to_string(idPaciente) + "," + std::to_string(idMedico) + "," + fecha;
+    }
 };
+
+
+
 
 // Clase con la que manejo las operaciones del hospital.
 class ControladorHospital {
@@ -69,6 +85,8 @@ private:
     std::vector<Medico> medicos;
     std::vector<Paciente> pacientes;
     std::vector<Cita> citas;
+    
+
 
 public:
     // Gestión de médicos.
@@ -90,9 +108,10 @@ public:
     void listarCitas();
 
     // Generando los reportes.
-    void generarReportePacientes();
-    void generarReporteCitas();
-    void generarReporteEnfermedades();
+    void generarReportePacientesAtendidos(const std::string& fechaInicio, const std::string& fechaFin);
+    void generarReporteCitasPendientesPorMedico();
+    void generarReporteCitasPendientesPorEspecialidad();
+
 
     // Guardar datos.
     void guardarDatos();
