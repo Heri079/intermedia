@@ -45,19 +45,31 @@ void ControladorHospital::leerDatos() {
 
     // Leer citas
     std::ifstream citasFile("citas.csv");
-if (citasFile.is_open()) {
-    std::string line;
-    std::getline(citasFile, line); // Ignorar encabezado
-    while (std::getline(citasFile, line)) {
-        if (!line.empty()) {
-            citas.emplace_back(line); // Leer con el nuevo formato que incluye estado
+    if (citasFile.is_open()) {
+        std::string line;
+        std::getline(citasFile, line); // Ignorar encabezado
+        while (std::getline(citasFile, line)) {
+            if (!line.empty()) {
+                std::stringstream ss(line);
+                std::string idPacienteStr, idMedicoStr, fecha, estado;
+                std::getline(ss, idPacienteStr, ',');  // Leer ID_Paciente
+                std::getline(ss, idMedicoStr, ',');    // Leer ID_Medico
+                std::getline(ss, fecha, ',');          // Leer Fecha
+                std::getline(ss, estado);              // Leer Estado
+
+                // Convertir ID_Paciente e ID_Medico a enteros
+                int idPaciente = std::stoi(idPacienteStr);
+                int idMedico = std::stoi(idMedicoStr);
+
+                // Crear la cita y agregarla a la lista
+                citas.emplace_back(idPaciente, idMedico, fecha, estado);
+            }
         }
+        citasFile.close();
+        std::cout << "Datos de citas cargados exitosamente desde citas.csv.\n";
+    } else {
+        std::cerr << "No se pudo abrir el archivo de citas.\n";
     }
-    citasFile.close();
-    std::cout << "Datos de citas cargados exitosamente desde citas.csv.\n";
-} else {
-    std::cerr << "No se pudo abrir el archivo de citas.\n";
-}
 
 }
 
@@ -366,14 +378,15 @@ void ControladorHospital::listarCitas() {
     if (citas.empty()) {
         std::cout << "No hay citas registradas.\n";
     } else {
-        for (const auto &cita : citas) {
+        for (const auto& cita : citas) {
             std::cout << "ID Paciente: " << cita.idPaciente
                       << ", ID Médico: " << cita.idMedico
-                      << ", Fecha: " << cita.fecha << "\n"
+                      << ", Fecha: " << cita.fecha
                       << ", Estado: " << cita.estado << "\n";
         }
     }
 }
+
 void ControladorHospital::cambiarEstadoCita() {
     int idPaciente, idMedico;
     std::string nuevoEstado;
@@ -383,34 +396,39 @@ void ControladorHospital::cambiarEstadoCita() {
     std::cout << "Ingrese el ID del médico: ";
     std::cin >> idMedico;
 
+    // Buscar la cita
     auto it = std::find_if(citas.begin(), citas.end(),
                            [idPaciente, idMedico](const Cita &cita) {
                                return cita.idPaciente == idPaciente && cita.idMedico == idMedico;
                            });
 
     if (it != citas.end()) {
-        std::cout << "Estado actual: " << it->estado << "\n";
+        // Imprimir el estado actual
+        std::cout << "Estado actual de la cita: " << it->estado << "\n";
+        
+        // Solicitar el nuevo estado
         std::cout << "Ingrese el nuevo estado (Pendiente, Cancelada, Realizada): ";
-        std::cin.ignore();
+        std::cin.ignore(); // Limpiar el buffer del cin
         std::getline(std::cin, nuevoEstado);
 
+        // Validar y actualizar el estado
         if (nuevoEstado == "Pendiente" || nuevoEstado == "Cancelada" || nuevoEstado == "Realizada") {
-            it->estado = nuevoEstado;
-            std::cout << "Estado de la cita actualizado exitosamente.\n";
+            it->estado = nuevoEstado;  // Actualizar el estado
+            std::cout << "El estado de la cita ha sido actualizado a: " << it->estado << "\n";
         } else {
             std::cout << "Estado no válido. No se realizaron cambios.\n";
         }
     } else {
-        std::cout << "Cita no encontrada.\n";
+        std::cout << "No se encontró la cita con el ID del paciente y médico proporcionados.\n";
     }
 }
+
 
 
 
 void ControladorHospital::generarReportePacientesAtendidos(const std::string& fechaInicio, const std::string& fechaFin) {
     std::cout << "\n--- Reporte de Pacientes Atendidos ---\n";
 
-    // Convertir las fechas de string a un formato que se pueda comparar
     std::tm tmInicio = {};
     std::tm tmFin = {};
     std::stringstream ssInicio(fechaInicio);
@@ -425,7 +443,6 @@ void ControladorHospital::generarReportePacientesAtendidos(const std::string& fe
         ssCita >> std::get_time(&tmCita, "%d/%m/%Y");
 
         if (std::difftime(std::mktime(&tmCita), std::mktime(&tmInicio)) >= 0 && std::difftime(std::mktime(&tmCita), std::mktime(&tmFin)) <= 0) {
-            // Si la cita está dentro del rango, mostrar información
             auto paciente = std::find_if(pacientes.begin(), pacientes.end(), [cita](const Paciente& p) {
                 return p.id == cita.idPaciente;
             });
@@ -434,18 +451,19 @@ void ControladorHospital::generarReportePacientesAtendidos(const std::string& fe
                 std::cout << "Paciente: " << paciente->nombre
                           << ", Fecha: " << cita.fecha
                           << ", Médico: " << std::find_if(medicos.begin(), medicos.end(), [cita](const Medico& m) { return m.id == cita.idMedico; })->nombre
+                          << ", Estado: " << cita.estado  // Imprimir el estado
                           << "\n";
             }
         }
     }
 }
 
+
 void ControladorHospital::generarReporteCitasPendientesPorMedico() {
     std::cout << "\n--- Reporte de Citas Pendientes por Médico ---\n";
 
     std::map<int, std::vector<Cita>> citasPorMedico;
     
-    // Agrupar las citas por médico
     for (const auto& cita : citas) {
         citasPorMedico[cita.idMedico].push_back(cita);
     }
@@ -457,18 +475,20 @@ void ControladorHospital::generarReporteCitasPendientesPorMedico() {
             std::cout << "Médico: " << medico->nombre << "\n";
             for (const auto& cita : citas) {
                 std::cout << "  - Paciente: " << std::find_if(pacientes.begin(), pacientes.end(), [cita](const Paciente& p) { return p.id == cita.idPaciente; })->nombre
-                          << ", Fecha: " << cita.fecha << "\n";
+                          << ", Fecha: " << cita.fecha
+                          << ", Estado: " << cita.estado  // Imprimir el estado
+                          << "\n";
             }
         }
     }
 }
+
 
 void ControladorHospital::generarReporteCitasPendientesPorEspecialidad() {
     std::cout << "\n--- Reporte de Citas Pendientes por Especialidad ---\n";
 
     std::map<std::string, std::vector<Cita>> citasPorEspecialidad;
     
-    // Agrupar las citas por especialidad
     for (const auto& cita : citas) {
         auto medico = std::find_if(medicos.begin(), medicos.end(), [cita](const Medico& m) { return m.id == cita.idMedico; });
         
@@ -482,7 +502,9 @@ void ControladorHospital::generarReporteCitasPendientesPorEspecialidad() {
         for (const auto& cita : citas) {
             std::cout << "  - Paciente: " << std::find_if(pacientes.begin(), pacientes.end(), [cita](const Paciente& p) { return p.id == cita.idPaciente; })->nombre
                       << ", Médico: " << std::find_if(medicos.begin(), medicos.end(), [cita](const Medico& m) { return m.id == cita.idMedico; })->nombre
-                      << ", Fecha: " << cita.fecha << "\n";
+                      << ", Fecha: " << cita.fecha
+                      << ", Estado: " << cita.estado  // Imprimir el estado
+                      << "\n";
         }
     }
 }

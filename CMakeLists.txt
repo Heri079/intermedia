@@ -21,7 +21,7 @@ include_directories(${SOURCE_DIR})
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Archivos CSV que se deben copiar al mismo directorio que el binario final
-set(CSV_FILES ${CMAKE_SOURCE_DIR}/medicos.csv ${CMAKE_SOURCE_DIR}/pacientes.csv ${CMAKE_SOURCE_DIR}/citas.csv ${CMAKE_SOURCE_DIR}/reportes.csv)
+set(CSV_FILES ${CMAKE_SOURCE_DIR}/medicos.csv ${CMAKE_SOURCE_DIR}/pacientes.csv ${CMAKE_SOURCE_DIR}/citas.csv)
 
 # Copiar los archivos CSV al directorio de salida
 foreach(CSV_FILE ${CSV_FILES})
